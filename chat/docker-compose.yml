@@ -1,0 +1,133 @@
+version: "3.9"
+
+networks:
+  chat-local:
+  web:
+    external: true
+  # br-iran:
+  #   external: true
+
+services:
+
+  postgres:
+    image: "postgres:${POSTGRES_VERSION}"
+    container_name: "chat_postgres"
+    restart: "unless-stopped"
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+    volumes:
+      - "./data/postgres/data:/var/lib/postgresql/data"
+    labels:
+      - "traefik.enable=false"
+    networks:
+      chat-local:
+
+
+  redis:
+    image: "redis:${REDIS_VERSION}"
+    container_name: "chat_redis"
+    restart: "unless-stopped"
+    labels:
+      - "traefik.enable=false"
+    networks:
+      chat-local:
+
+
+  synapse:
+    image: "matrixdotorg/synapse:${SYNAPSE_VERSION}"
+    container_name: "chat_synapse"
+    restart: "unless-stopped"
+    environment:
+      - "SYNAPSE_CONFIG_DIR:/data"
+      - "SYNAPSE_CONFIG_PATH:/synapse/homeserver.yaml"
+      - "UID:1000"
+      - "GID:1000"
+      - "TZ:Asia/Tehran"
+      # - "HTTP_PROXY=http://10.50.0.192:8080"
+      # - "HTTPS_PROXY=http://10.50.0.192:8080"
+
+    expose:
+      - 8008
+      - 8448
+    volumes:
+      - "./synapse:/data"
+      - "./data/media_store:/media_store"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.services.synapse.loadbalancer.server.port=8008"
+      - "traefik.http.routers.synapse.rule=Host(`synapse.${DOMAIN}`)"
+      - "traefik.http.routers.synapse.entrypoints=websecure"
+      - "traefik.http.routers.synapse.tls=true"
+      - "traefik.http.routers.synapse.tls.certresolver=le"
+      - "traefik.http.routers.synapse.service=synapse"
+
+      - "traefik.http.services.synapse-fed.loadbalancer.server.port=8448"
+      - "traefik.http.routers.synapse-fed.rule=Host(`fed.synapse.${DOMAIN}`)"
+      - "traefik.http.routers.synapse-fed.service=synapse-fed"
+      - "traefik.http.routers.synapse-fed.entrypoints=websecure"
+      - "traefik.http.routers.synapse-fed.tls=true"
+      - "traefik.http.routers.synapse-fed.tls.certresolver=le"
+    networks:
+      # br-iran:
+      chat-local:
+      web:
+  matrix:
+    image: "nginx:${NGINX_VERSION}"
+    container_name: "chat_matrix"
+    restart: "unless-stopped"
+    volumes:
+      - "./matrix/matrix.conf:/etc/nginx/conf.d/default.conf:ro"
+      - "./matrix/www:/var/www/:ro"
+    expose:
+      - 80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.matrix-https.loadbalancer.server.port=80"
+      - "traefik.http.routers.matrix-https.entrypoints=websecure"
+      - "traefik.http.routers.matrix-https.rule=Host(`${DOMAIN}`) && ( PathPrefix(`/_matrix`) || PathPrefix(`/.well-known/matrix`))"
+      - "traefik.http.routers.matrix-https.tls.certresolver=le"
+      - "traefik.http.routers.matrix-https.tls=true"
+      - "traefik.http.routers.matrix-https.priority=100"
+      - "traefik.docker.network=web"
+    networks:
+      chat-local:
+      web:
+
+  element:
+    image: "nginx:${NGINX_VERSION}"
+    container_name: "chat_element"
+    expose:
+      - 80
+    volumes:
+      - ./element/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./element/www:/usr/share/nginx/html/
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.chat-https.loadbalancer.server.port=80"
+      - "traefik.http.routers.chat-https.entrypoints=websecure"
+      - "traefik.http.routers.chat-https.rule=Host(`chat.${DOMAIN}`)"
+      - "traefik.http.routers.chat-https.tls.certresolver=le"
+      - "traefik.http.routers.chat-https.tls=true"
+      - "traefik.docker.network=web"
+    networks:
+      web:
+      
+  coturn:
+    image: "coturn/coturn:4.6.0-r0"
+    container_name: "chat_coturn"
+    restart: "unless-stopped"
+    labels:
+      - "traefik.enable=false"
+    # environment:
+    #   - "HTTP_PROXY=http://10.50.0.192:8080"
+    #   - "HTTPS_PROXY=http://10.50.0.192:8080"
+
+    volumes:
+      - "./coturn/turnserver.conf:/etc/coturn/turnserver.conf"
+    ports:
+      - "49160-49200:49160-49200/udp"
+      - "3478:3478"
+      - "5349:5349"

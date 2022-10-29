@@ -1,0 +1,35 @@
+version: '3.3'
+
+services:
+  main:
+    container_name: main
+    image: nginx:1.23.1-alpine
+    volumes: 
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./html/:/usr/share/nginx/html/
+    expose:
+      - 80
+    environment:
+      - NGINX_PORT=80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.main-https.loadbalancer.server.port=80"
+      - "traefik.http.routers.main-https.entrypoints=websecure"
+      - "traefik.http.routers.main-https.rule=Host(`%%DOMAIN%%`)"
+      - "traefik.http.routers.main-https.tls.certresolver=le"
+      - "traefik.http.routers.main-https.tls=true"
+      - "traefik.http.routers.main-https.service=main-https"
+
+
+
+      - "traefik.http.services.main-http.loadbalancer.server.port=80"
+      - "traefik.http.routers.main-http.entrypoints=web"
+      - "traefik.http.routers.main-http.rule=Host(`%%DOMAIN%%`)"
+      - "traefik.http.routers.main-http.service=main-http"
+
+      - "traefik.docker.network=web"
+    networks:
+      web:
+networks:
+  web:
+    external: true

@@ -1,0 +1,956 @@
+server_name: "%%DOMAIN%%"
+
+pid_file: /data/homeserver.pid
+
+web_client_location: https://chat.%%DOMAIN%%/
+
+public_baseurl: https://synapse.%%DOMAIN%%/
+
+
+
+#soft_file_limit: 0
+
+use_presence: true
+
+require_auth_for_profile_requests: false
+
+limit_profile_requests_to_users_who_share_rooms: false
+
+# include_profile_data_on_invite: false
+
+allow_public_rooms_without_auth: true
+
+allow_public_rooms_over_federation: true
+
+default_room_version: "9"
+
+#gc_thresholds: [700, 10, 10]
+
+#filter_timeline_limit: 5000
+
+block_non_admin_invites: false
+
+enable_search: true
+
+ip_range_blacklist:
+  - '127.0.0.0/8'
+  - '10.0.0.0/8'
+  - '172.16.0.0/12'
+  - '192.168.0.0/16'
+  - '100.64.0.0/10'
+  - '192.0.0.0/24'
+  - '169.254.0.0/16'
+  - '192.88.99.0/24'
+  - '198.18.0.0/15'
+  - '192.0.2.0/24'
+  - '198.51.100.0/24'
+  - '203.0.113.0/24'
+  - '224.0.0.0/4'
+  - '::1/128'
+  - 'fe80::/10'
+  - 'fc00::/7'
+  - '2001:db8::/32'
+  - 'ff00::/8'
+  - 'fec0::/10'
+
+
+#ip_range_whitelist:
+#   - '192.168.1.1'
+
+listeners:
+
+  - port: 8448
+    type: http
+    tls: false
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+
+    resources:
+      - names: [client, federation]
+        compress: false
+
+    # example additional_resources:
+    #
+    #additional_resources:
+    #  "/_matrix/my/custom/endpoint":
+    #    module: my_module.CustomRequestHandler
+    #    config: {}
+
+  # Turn on the twisted ssh manhole service on localhost on the given
+  # port.
+  #
+  #- port: 9000
+  #  bind_addresses: ['::1', '127.0.0.1']
+  #  type: manhole
+
+
+#dummy_events_threshold: 5
+
+delete_stale_devices_after: 1y
+suppress_key_server_warning: true
+
+admin_contact: 'mailto:%%ADMIN_EMAIL%%'
+
+#hs_disabled: false
+#hs_disabled_message: 'Human readable reason for why the HS is blocked'
+
+
+limit_usage_by_mau: false
+#max_mau_value: 50
+#mau_trial_days: 2
+#mau_limit_alerting: false
+
+#mau_stats_only: false
+
+#mau_limit_reserved_threepids:
+#  - medium: 'email'
+#    address: 'reserved_user@example.com'
+
+#server_context: context
+
+
+limit_remote_rooms:
+  enabled: false
+  #complexity: 0.5
+  #complexity_error: "This room is too complex."
+  #admins_can_join: true
+
+require_membership_for_aliases: false
+allow_per_room_profiles: true
+
+#max_avatar_size: 10M
+#allowed_avatar_mimetypes: ["image/png", "image/jpeg", "image/gif"]
+
+redaction_retention_period: 28d
+user_ips_max_age: 14d
+
+# templates:
+#   custom_template_directory: /path/to/custom/templates/
+
+
+retention:
+  enabled: false
+
+  #default_policy:
+  #  min_lifetime: 1d
+  #  max_lifetime: 1y
+
+  #allowed_lifetime_min: 1d
+  #allowed_lifetime_max: 1y
+
+  #purge_jobs:
+  #  - longest_max_lifetime: 3d
+  #    interval: 12h
+  #  - shortest_max_lifetime: 3d
+  #    interval: 1d
+
+#request_token_inhibit_3pid_errors: true
+
+#next_link_domain_whitelist: ["matrix.org"]
+
+
+#tls_certificate_path: "/data/%%DOMAIN%%.tls.crt"
+#tls_private_key_path: "/data/%%DOMAIN%%.tls.key"
+# federation_verify_certificates: false
+#federation_client_minimum_tls_version: 1.2
+
+#federation_certificate_verification_whitelist:
+#  - lon.example.com
+#  - *.domain.com
+#  - *.onion
+
+#federation_custom_ca_list:
+#  - myCA1.pem
+#  - myCA2.pem
+#  - myCA3.pem
+
+
+acme:
+    enabled: false
+    port: 80
+    bind_addresses: ['::', '0.0.0.0']
+    reprovision_threshold: 30
+    domain: matrix.example.com
+    account_key_file: /data/acme_account.key
+
+#tls_fingerprints: [{"sha256": "<base64_encoded_sha256_fingerprint>"}]
+
+#federation_domain_whitelist:
+#  - lon.example.com
+#  - nyc.example.com
+#  - syd.example.com
+
+#federation_metrics_domains:
+#  - matrix.org
+#  - example.com
+allow_profile_lookup_over_federation: true
+allow_device_name_lookup_over_federation: true
+
+
+## Caching ##
+
+event_cache_size: 10K
+
+caches:
+   #global_factor: 1.0
+   per_cache_factors:
+     #get_users_who_share_room_with_user: 2.0
+
+
+## Database ##
+
+database:
+  name: psycopg2
+  args:
+    user: synapse
+    password: %%POSTGRES_SYNAPSE_PASSWORD%%
+    database: synapse
+    host: postgres   
+    cp_min: 5
+    cp_max: 10
+
+## Logging ##
+log_config: "/data/%%DOMAIN%%.log.config"
+
+
+## Ratelimiting ##
+
+rc_message:
+ per_second: 0.1
+ burst_count: 10
+#
+rc_registration:
+ per_second: 0.17
+ burst_count: 3
+#
+#rc_login:
+#  address:
+#    per_second: 0.17
+#    burst_count: 3
+#  account:
+#    per_second: 0.17
+#    burst_count: 3
+#  failed_attempts:
+#    per_second: 0.17
+#    burst_count: 3
+#
+#rc_admin_redaction:
+#  per_second: 1
+#  burst_count: 50
+#
+#rc_joins:
+#  local:
+#    per_second: 0.1
+#    burst_count: 3
+#  remote:
+#    per_second: 0.01
+#    burst_count: 3
+#
+#rc_3pid_validation:
+#  per_second: 0.003
+#  burst_count: 5
+#
+#rc_invites:
+#  per_room:
+#    per_second: 0.3
+#    burst_count: 10
+#  per_user:
+#    per_second: 0.003
+#    burst_count: 5
+
+#rc_federation:
+#  window_size: 1000
+#  sleep_limit: 10
+#  sleep_delay: 500
+#  reject_limit: 50
+#  concurrent: 3
+
+#federation_rr_transactions_per_room_per_second: 50
+
+
+
+## Media Store ##
+enable_media_repo: true
+media_store_path: "/media_store"
+# TODO: add minio
+media_storage_providers:
+ - module: file_system
+   # Whether to store newly uploaded local files
+   store_local: true
+   # Whether to store newly downloaded remote files
+   store_remote: true
+   # Whether to wait for successful storage for local uploads
+   store_synchronous: false
+   config:
+      directory: /media_store
+
+#max_upload_size: 100M
+#max_image_pixels: 20M
+#dynamic_thumbnails: false
+thumbnail_sizes:
+ - width: 32
+   height: 32
+   method: crop
+ - width: 96
+   height: 96
+   method: crop
+ - width: 320
+   height: 240
+   method: scale
+ - width: 640
+   height: 480
+   method: scale
+ - width: 800
+   height: 600
+   method: scale
+
+url_preview_enabled: true
+
+url_preview_ip_range_blacklist:
+ - '127.0.0.0/8'
+ - '10.0.0.0/8'
+ - '172.16.0.0/12'
+ - '192.168.0.0/16'
+ - '100.64.0.0/10'
+ - '192.0.0.0/24'
+ - '169.254.0.0/16'
+ - '192.88.99.0/24'
+ - '198.18.0.0/15'
+ - '192.0.2.0/24'
+ - '198.51.100.0/24'
+ - '203.0.113.0/24'
+ - '224.0.0.0/4'
+ - '::1/128'
+ - 'fe80::/10'
+ - 'fc00::/7'
+ - '2001:db8::/32'
+ - 'ff00::/8'
+ - 'fec0::/10'
+
+#url_preview_ip_range_whitelist:
+#   - '192.168.1.1'
+
+#url_preview_url_blacklist:
+#  # blacklist any URL with a username in its URI
+#  - username: '*'
+#
+#  # blacklist all *.google.com URLs
+#  - netloc: 'google.com'
+#  - netloc: '*.google.com'
+#
+#  # blacklist all plain HTTP URLs
+#  - scheme: 'http'
+#
+#  # blacklist http(s)://www.acme.com/foo
+#  - netloc: 'www.acme.com'
+#    path: '/foo'
+#
+#  # blacklist any URL with a literal IPv4 address
+#  - netloc: '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'
+
+#max_spider_size: 10M
+
+# url_preview_accept_language:
+#   - en-UK
+#   - en-US;q=0.9
+#   - fr;q=0.8
+#   - *;q=0.7
+#
+url_preview_accept_language:
+#   - en
+
+
+## Captcha ##
+#recaptcha_public_key: "YOUR_PUBLIC_KEY"
+#recaptcha_private_key: "YOUR_PRIVATE_KEY"
+#enable_registration_captcha: true
+#recaptcha_siteverify_api: "https://my.recaptcha.site"
+
+
+## TURN ##
+turn_uris: 
+  - "turn:%%DOMAIN%%:3478?transport=udp"
+  - "turn:%%DOMAIN%%:3478?transport=tcp"
+  - "turns:%%DOMAIN%%:3478?transport=udp"
+  - "turns:%%DOMAIN%%:3478?transport=tcp"
+
+turn_shared_secret: "%%turn_shared_secret%%"
+turn_user_lifetime: 86400000
+turn_allow_guests: True
+
+## Registration ##
+enable_registration: true
+enable_registration_without_verification: true
+account_validity:
+  #enabled: true
+  #period: 6w
+  #renew_at: 1w
+  #renew_email_subject: "Renew your %(app)s account"
+  #template_dir: "res/templates"
+  #account_renewed_html_path: "account_renewed.html"
+  #invalid_token_html_path: "invalid_token.html"
+
+#session_lifetime: 24h
+
+#registrations_require_3pid:
+#  - email
+#  - msisdn
+
+#disable_msisdn_registration: true
+
+#allowed_local_3pids:
+#  - medium: email
+#    pattern: '.*@matrix\.org'
+#  - medium: email
+#    pattern: '.*@vector\.im'
+#  - medium: msisdn
+#    pattern: '\+44'
+
+#enable_3pid_lookup: true
+
+registration_shared_secret: "%%registration_shared_secret%%"
+
+#bcrypt_rounds: 12
+
+# Allows users to register as guests without a password/email/etc, and
+# participate in rooms hosted on this server which have been made
+# accessible to anonymous users.
+
+allow_guest_access: true
+
+#default_identity_server: https://matrix.org
+account_threepid_delegates:
+    #email: https://example.com     # Delegate email sending to example.com
+    #msisdn: http://localhost:8090  # Delegate SMS sending to this local process
+
+enable_set_displayname: true
+
+enable_set_avatar_url: true
+
+#enable_3pid_changes: false
+
+# TODO: enable auto join
+# auto_join_rooms:
+#  - "#announcement:%%DOMAIN%%"
+#autocreate_auto_join_rooms: false
+#autocreate_auto_join_rooms_federated: false
+#autocreate_auto_join_room_preset: private_chat
+#auto_join_mxid_localpart: system
+#auto_join_rooms_for_guests: false
+
+
+## Metrics ###
+#enable_metrics: false
+
+#sentry:
+#    dsn: "..."
+
+metrics_flags:
+    #known_servers: true
+
+report_stats: true
+
+# TODO: usage stat
+#report_stats_endpoint: https://example.com/report-usage-stats/push
+
+
+## API Configuration ##
+#room_invite_state_types:
+#  - "m.room.join_rules"
+#  - "m.room.canonical_alias"
+#  - "m.room.avatar"
+#  - "m.room.encryption"
+#  - "m.room.name"
+
+
+#app_service_config_files:
+#  - app_service_1.yaml
+#  - app_service_2.yaml
+
+#track_appservice_user_ips: true
+
+
+macaroon_secret_key: "%%macaroon_secret_key%%"
+form_secret: "%%form_secret%%"
+
+## Signing Keys ##
+signing_key_path: "/data/%%DOMAIN%%.signing.key"
+old_signing_keys:
+  #"ed25519:id": { key: "base64string", expired_ts: 123456789123 }
+
+#key_refresh_interval: 1d
+
+
+trusted_key_servers:
+  - server_name: "matrix.org"
+#   - server_name: "wiiz.ir"
+
+
+# accept_keys_insecurely: true
+#key_server_signing_keys_path: "key_server_signing_keys.key"
+
+
+## Single sign-on integration ##
+saml2_config:
+  sp_config:
+    #metadata:
+    #  local: ["saml2/idp.xml"]
+    #  remote:
+    #    - url: https://our_idp/metadata.xml
+
+    #accepted_time_diff: 3
+
+    #service:
+    #  sp:
+    #    allow_unsolicited: true
+    #description: ["My awesome SP", "en"]
+    #name: ["Test SP", "en"]
+
+    #ui_info:
+    #  display_name:
+    #    - lang: en
+    #      text: "Display Name is the descriptive name of your service."
+    #  description:
+    #    - lang: en
+    #      text: "Description should be a short paragraph explaining the purpose of the service."
+    #  information_url:
+    #    - lang: en
+    #      text: "https://example.com/terms-of-service"
+    #  privacy_statement_url:
+    #    - lang: en
+    #      text: "https://example.com/privacy-policy"
+    #  keywords:
+    #    - lang: en
+    #      text: ["Matrix", "Element"]
+    #  logo:
+    #    - lang: en
+    #      text: "https://example.com/logo.svg"
+    #      width: "200"
+    #      height: "80"
+
+    #organization:
+    #  name: Example com
+    #  display_name:
+    #    - ["Example co", "en"]
+    #  url: "http://example.com"
+
+    #contact_person:
+    #  - given_name: Bob
+    #    sur_name: "the Sysadmin"
+    #    email_address": ["admin@example.com"]
+    #    contact_type": technical
+
+  #config_path: "/data/sp_conf.py"
+
+  #saml_session_lifetime: 5m
+
+  user_mapping_provider:
+    #module: mapping_provider.SamlMappingProvider
+    config:
+      #mxid_source_attribute: displayName
+      #mxid_mapping: dotreplace
+
+  #grandfathered_mxid_source_attribute: upn
+
+  #attribute_requirements:
+  #  - attribute: userGroup
+  #    value: "staff"
+  #  - attribute: department
+  #    value: "sales"
+
+  #idp_entityid: 'https://our_idp/entityid'
+
+
+#
+#   idp_id: a unique identifier for this identity provider. Used internally
+#       by Synapse; should be a single word such as 'github'.
+#
+#       Note that, if this is changed, users authenticating via that provider
+#       will no longer be recognised as the same user!
+#
+#   idp_name: A user-facing name for this identity provider, which is used to
+#       offer the user a choice of login mechanisms.
+#
+#   idp_icon: An optional icon for this identity provider, which is presented
+#       by clients and Synapse's own IdP picker page. If given, must be an
+#       MXC URI of the format mxc://<server-name>/<media-id>. (An easy way to
+#       obtain such an MXC URI is to upload an image to an (unencrypted) room
+#       and then copy the "url" from the source of the event.)
+#
+#   idp_brand: An optional brand for this identity provider, allowing clients
+#       to style the login flow according to the identity provider in question.
+#       See the spec for possible options here.
+#
+#   discover: set to 'false' to disable the use of the OIDC discovery mechanism
+#       to discover endpoints. Defaults to true.
+#
+#   issuer: Required. The OIDC issuer. Used to validate tokens and (if discovery
+#       is enabled) to discover the provider's endpoints.
+#
+#   client_id: Required. oauth2 client id to use.
+#
+#   client_secret: Required. oauth2 client secret to use.
+#
+#   client_auth_method: auth method to use when exchanging the token. Valid
+#       values are 'client_secret_basic' (default), 'client_secret_post' and
+#       'none'.
+#
+#   scopes: list of scopes to request. This should normally include the "openid"
+#       scope. Defaults to ["openid"].
+#
+#   authorization_endpoint: the oauth2 authorization endpoint. Required if
+#       provider discovery is disabled.
+#
+#   token_endpoint: the oauth2 token endpoint. Required if provider discovery is
+#       disabled.
+#
+#   userinfo_endpoint: the OIDC userinfo endpoint. Required if discovery is
+#       disabled and the 'openid' scope is not requested.
+#
+#   jwks_uri: URI where to fetch the JWKS. Required if discovery is disabled and
+#       the 'openid' scope is used.
+#
+#   skip_verification: set to 'true' to skip metadata verification. Use this if
+#       you are connecting to a provider that is not OpenID Connect compliant.
+#       Defaults to false. Avoid this in production.
+#
+#   user_profile_method: Whether to fetch the user profile from the userinfo
+#       endpoint. Valid values are: 'auto' or 'userinfo_endpoint'.
+#
+#       Defaults to 'auto', which fetches the userinfo endpoint if 'openid' is
+#       included in 'scopes'. Set to 'userinfo_endpoint' to always fetch the
+#       userinfo endpoint.
+#
+#   allow_existing_users: set to 'true' to allow a user logging in via OIDC to
+#       match a pre-existing account instead of failing. This could be used if
+#       switching from password logins to OIDC. Defaults to false.
+#
+#   user_mapping_provider: Configuration for how attributes returned from a OIDC
+#       provider are mapped onto a matrix user. This setting has the following
+#       sub-properties:
+#
+#       module: The class name of a custom mapping module. Default is
+#           'synapse.handlers.oidc_handler.JinjaOidcMappingProvider'.
+#           See https://github.com/matrix-org/synapse/blob/master/docs/sso_mapping_providers.md#openid-mapping-providers
+#           for information on implementing a custom mapping provider.
+#
+#       config: Configuration for the mapping provider module. This section will
+#           be passed as a Python dictionary to the user mapping provider
+#           module's `parse_config` method.
+#
+#           For the default provider, the following settings are available:
+#
+#             subject_claim: name of the claim containing a unique identifier
+#                 for the user. Defaults to 'sub', which OpenID Connect
+#                 compliant providers should provide.
+#
+#             localpart_template: Jinja2 template for the localpart of the MXID.
+#                 If this is not set, the user will be prompted to choose their
+#                 own username (see 'sso_auth_account_details.html' in the 'sso'
+#                 section of this file).
+#
+#             display_name_template: Jinja2 template for the display name to set
+#                 on first login. If unset, no displayname will be set.
+#
+#             email_template: Jinja2 template for the email address of the user.
+#                 If unset, no email address will be added to the account.
+#
+#             extra_attributes: a map of Jinja2 templates for extra attributes
+#                 to send back to the client during login.
+#                 Note that these are non-standard and clients will ignore them
+#                 without modifications.
+#
+#           When rendering, the Jinja2 templates are given a 'user' variable,
+#           which is set to the claims returned by the UserInfo Endpoint and/or
+#           in the ID Token.
+#
+
+oidc_providers:
+  #- idp_id: my_idp
+  #  idp_name: "My OpenID provider"
+  #  idp_icon: "mxc://example.com//mediaid"
+  #  discover: false
+  #  issuer: "https://accounts.example.com/"
+  #  client_id: "provided-by-your-issuer"
+  #  client_secret: "provided-by-your-issuer"
+  #  client_auth_method: client_secret_post
+  #  scopes: ["openid", "profile"]
+  #  authorization_endpoint: "https://accounts.example.com/oauth2/auth"
+  #  token_endpoint: "https://accounts.example.com/oauth2/token"
+  #  userinfo_endpoint: "https://accounts.example.com/userinfo"
+  #  jwks_uri: "https://accounts.example.com/.well-known/jwks.json"
+  #  skip_verification: true
+  #  user_mapping_provider:
+  #    config:
+  #      subject_claim: "id"
+  #      localpart_template: "{{ user.login }}"
+  #      display_name_template: "{{ user.name }}"
+  #      email_template: "{{ user.email }}"
+
+  # For use with Keycloak
+  #
+  #- idp_id: keycloak
+  #  idp_name: Keycloak
+  #  issuer: "https://127.0.0.1:8443/auth/realms/my_realm_name"
+  #  client_id: "synapse"
+  #  client_secret: "copy secret generated in Keycloak UI"
+  #  scopes: ["openid", "profile"]
+
+  # For use with Github
+  #
+  #- idp_id: github
+  #  idp_name: Github
+  #  idp_brand: org.matrix.github
+  #  discover: false
+  #  issuer: "https://github.com/"
+  #  client_id: "your-client-id" # TO BE FILLED
+  #  client_secret: "your-client-secret" # TO BE FILLED
+  #  authorization_endpoint: "https://github.com/login/oauth/authorize"
+  #  token_endpoint: "https://github.com/login/oauth/access_token"
+  #  userinfo_endpoint: "https://api.github.com/user"
+  #  scopes: ["read:user"]
+  #  user_mapping_provider:
+  #    config:
+  #      subject_claim: "id"
+  #      localpart_template: "{{ user.login }}"
+  #      display_name_template: "{{ user.name }}"
+
+
+cas_config:
+  #enabled: true
+  #server_url: "https://cas-server.com"
+  #displayname_attribute: name
+
+  #required_attributes:
+  #  userGroup: "staff"
+  #  department: None
+
+
+sso:
+    #client_whitelist:
+    #  - https://riot.im/develop
+    #  - https://my.custom.client/
+
+    #template_dir: "res/templates"
+
+
+#jwt_config:
+    #enabled: true
+    #secret: "provided-by-your-issuer"
+    #algorithm: "provided-by-your-issuer"
+    #issuer: "provided-by-your-issuer"
+    #audiences:
+    #    - "provided-by-your-issuer"
+
+
+password_config:
+   #enabled: false
+   #localdb_enabled: false
+   #pepper: "EVEN_MORE_SECRET"
+   policy:
+      #enabled: true
+      #minimum_length: 15
+      #require_digit: true
+      #require_symbol: true
+      #require_lowercase: true
+      #require_uppercase: true
+
+ui_auth:
+    #session_timeout: "15s"
+
+
+email:
+  #smtp_host: mail.server
+  #smtp_port: 587
+  #smtp_user: "exampleusername"
+  #smtp_pass: "examplepassword"
+  #require_transport_security: true
+  #notif_from: "Your Friendly %(app)s homeserver <noreply@example.com>"
+  #app_name: my_branded_matrix_server
+  #enable_notifs: true
+  #notif_for_new_users: false
+  #client_base_url: "http://localhost/riot"
+  #validation_token_lifetime: 15m
+  #invite_client_location: https://app.element.io
+  #template_dir: "res/templates"
+  #subjects:
+    #message_from_person_in_room: "[%(app)s] You have a message on %(app)s from %(person)s in the %(room)s room..."
+    #message_from_person: "[%(app)s] You have a message on %(app)s from %(person)s..."
+    #messages_from_person: "[%(app)s] You have messages on %(app)s from %(person)s..."
+    #messages_in_room: "[%(app)s] You have messages on %(app)s in the %(room)s room..."
+    #messages_in_room_and_others: "[%(app)s] You have messages on %(app)s in the %(room)s room and others..."
+    #messages_from_person_and_others: "[%(app)s] You have messages on %(app)s from %(person)s and others..."
+    #invite_from_person_to_room: "[%(app)s] %(person)s has invited you to join the %(room)s room on %(app)s..."
+    #invite_from_person: "[%(app)s] %(person)s has invited you to chat on %(app)s..."
+    #password_reset: "[%(server_name)s] Password reset"
+    #email_validation: "[%(server_name)s] Validate your email"
+
+
+password_providers:
+#    - module: "ldap_auth_provider.LdapAuthProvider"
+#      config:
+#        enabled: true
+#        uri: "ldap://ldap.example.com:389"
+#        start_tls: true
+#        base: "ou=users,dc=example,dc=com"
+#        attributes:
+#           uid: "cn"
+#           mail: "email"
+#           name: "givenName"
+#        #bind_dn:
+#        #bind_password:
+#        #filter: "(objectClass=posixAccount)"
+
+
+
+## Push ##
+push:
+  include_content: false
+  group_unread_count_by_room: false
+
+
+spam_checker:
+   #- module: "my_custom_project.SuperSpamChecker"
+   #  config:
+   #    example_option: 'things'
+   #- module: "some_other_project.BadEventStopper"
+   #  config:
+   #    example_stop_events_from: ['@bad:example.com']
+
+
+## Rooms ##
+#encryption_enabled_by_default_for_room_type: invite
+#enable_group_creation: true
+#group_creation_prefix: "unofficial_"
+
+# User Directory configuration
+user_directory:
+ enabled: true
+ search_all_users: true
+
+
+# User Consent configuration
+#user_consent:
+#  template_dir: res/templates/privacy
+#  version: 1.0
+#  server_notice_content:
+#    msgtype: m.text
+#    body: >-
+#      To continue using this homeserver you must review and agree to the
+#      terms and conditions at %(consent_uri)s
+#  send_server_notice_to_guests: true
+#  block_events_error: >-
+#    To continue using this homeserver you must review and agree to the
+#    terms and conditions at %(consent_uri)s
+#  require_at_registration: false
+#  policy_name: Privacy Policy
+#
+
+
+
+# Local statistics collection. Used in populating the room directory.
+#stats:
+#   enabled: true
+#   bucket_size: 1d
+#   retention: 1y
+
+
+# Server Notices room configuration
+#server_notices:
+#  system_mxid_localpart: notices
+#  system_mxid_display_name: "Server Notices"
+#  system_mxid_avatar_url: "mxc://server.com/oumMVlgDnLYFaPVkExemNVVZ"
+#  room_name: "Server Notices"
+
+
+#enable_room_list_search: false
+
+#alias_creation_rules:
+#  - user_id: "*"
+#    alias: "*"
+#    room_id: "*"
+#    action: allow
+
+# The `room_list_publication_rules` option controls who can publish and
+# which rooms can be published in the public room list.
+#
+# The format of this option is the same as that for
+# `alias_creation_rules`.
+#
+# If the room has one or more aliases associated with it, only one of
+# the aliases needs to match the alias rule. If there are no aliases
+# then only rules with `alias: *` match.
+#
+# If no rules match the request is denied. An empty list means no one
+# can publish rooms.
+#
+# Options for the rules include:
+#
+#   user_id: Matches against the creator of the alias
+#   room_id: Matches against the room ID being published
+#   alias: Matches against any current local or canonical aliases
+#            associated with the room
+#   action: Whether to "allow" or "deny" the request if the rule matches
+#
+# The default is:
+#
+#room_list_publication_rules:
+#  - user_id: "*"
+#    alias: "*"
+#    room_id: "*"
+#    action: allow
+
+
+#third_party_event_rules:
+#  module: "my_custom_project.SuperRulesSet"
+#  config:
+#    example_option: 'things'
+
+
+## Opentracing ##
+opentracing:
+    #enabled: true
+    #homeserver_whitelist:
+    #  - ".*"
+
+    #jaeger_config:
+    #  sampler:
+    #    type: const
+    #    param: 1
+
+    #  logging:
+    #    false
+
+
+## Workers ##
+#send_federation: false
+#federation_sender_instances:
+#  - federation_sender1
+
+#instance_map:
+#  worker1:
+#    host: localhost
+#    port: 8034
+
+#stream_writers:
+#  events: worker1
+#  typing: worker1
+
+#run_background_tasks_on: worker1
+#worker_replication_secret: ""
+
+redis:
+  enabled: true
+
+  host: redis
+  port: 6379
+  #password: <secret_password>
+
+
+# vim:ft=yaml

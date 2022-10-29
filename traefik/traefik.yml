@@ -1,0 +1,37 @@
+api:
+  dashboard: true
+  insecure: true
+
+entryPoints:
+
+  # ---------------------------------------------- HTTP
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+
+  # ---------------------------------------------- HTTPS
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      insecure: true
+
+
+certificatesResolvers:
+  le:
+    acme:
+      email: %%ADMIN_EMAIL%%
+      storage: /etc/traefik/acme.json
+      tlsChallenge: {}
+      
+
+
+providers:
+  docker:
+    watch: true
+    network: "web"
+  file:
+    directory: /etc/traefik/dynamics
+    watch: true

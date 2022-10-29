@@ -1,0 +1,84 @@
+{
+    "inbounds": [
+        {
+            "tag": "http-in",
+            "protocol": "http",
+            "listen": "0.0.0.0",
+            "port": 8080
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "vmess",
+            // "settings": {
+            //     "vnext": [
+            //         {
+            //             "address": "--",
+            //             "port": 443,
+            //             "users": [
+            //                 {
+            //                     "email": "user@v2ray.com",
+            //                     "id": "cb09ca64-8f6c-4c6a-ff9d-597eaed2a424",
+            //                     "alterId": 0,
+            //                     "security": "auto"
+            //                 }
+            //             ]
+            //         }
+            //     ]
+            // },
+            // "streamSettings": {
+            //     "network": "ws",
+            //     "security": "tls",
+            //     "tlsSettings": {
+            //         "allowInsecure": true,
+            //         "serverName": "--"
+            //     },
+            //     "wsSettings": {
+            //         "connectionReuse": true,
+            //         "path": "--",
+            //         "headers": {
+            //             "Host": "--"
+            //         }
+            //     }
+            // },
+            // "mux": {
+            //     "enabled": false
+            // },
+            "tag": "proxy"
+        },
+        {
+            "tag": "direct",
+            "protocol": "freedom",
+            "settings": {
+                "domainStrategy": "UseIP"
+            }
+        },
+        {
+            "protocol": "blackhole",
+            "settings": {},
+            "tag": "block"
+        }
+    ],
+    "dns": {
+        "servers": [
+            "1.1.1.1",
+            "1.0.0.1",
+            "localhost"
+        ]
+    },
+    "routing": {
+        "domainStrategy": "IPOnDemand",
+        "rules": [
+            {
+                "type": "field",
+                "ip": [
+                    "geoip:private"
+                ],
+                "outboundTag": "direct",
+                "inboundTag": [
+                    "http-in"
+                ]
+            }
+        ]
+    }
+}
