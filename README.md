@@ -90,6 +90,8 @@ these packages needed to be installed in your machine and working:
 
 
 
+```
+
 ./chat/.env                       %%DOMAIN%%
 ./chat/.env                       %%POSTGRES_PASSWORD%%
 ./chat/synapse/homeserver.yaml    %%POSTGRES_SYNAPSE_PASSWORD%%
@@ -107,3 +109,5 @@ these packages needed to be installed in your machine and working:
 ./chat/element/www/config.json    %%NAME%%
 ./chat/coturn/turnserver.conf     %%cli_password%%
 ./chat/coturn/turnserver.conf     %%external_ip%%
+
+```
